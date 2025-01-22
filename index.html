@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCX - Home</title>
+    <style>
+        /* General Page Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #1c1c1c;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .menu {
+            display: flex;
+            gap: 15px;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .menu a:hover {
+            color: #1abc9c;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons a {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .auth-buttons a:hover {
+            background-color: #16a085;
+        }
+
+        .content {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .content h1 {
+            font-size: 3em;
+            color: #f1c40f;
+        }
+
+        .content p {
+            font-size: 1.2em;
+        }
+
+        /* Chatbot Button */
+        .chatbot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Chatbot Container */
+        .chatbot-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            height: 400px;
+            background-color: #1c1c1c;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chatbot-header {
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background-color: #000;
+        }
+
+        .chatbot-message {
+            margin: 5px 0;
+        }
+
+        .chatbot-user {
+            text-align: right;
+            color: #f1c40f;
+        }
+
+        .chatbot-bot {
+            text-align: left;
+            color: #1abc9c;
+        }
+
+        .chatbot-input-container {
+            display: flex;
+            padding: 10px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+
+        .chatbot-send-button {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .chatbot-send-button:hover {
+            background-color: #16a085;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <img src="placeholder-logo.png" alt="ACCX Logo">
+        <div class="menu">
+            <a href="#">Home</a>
+            <a href="#">Ledger</a>
+            <a href="#">Transactions</a>
+            <a href="#">ITC Tracker</a>
+            <a href="#">Reconciliation</a>
+            <a href="#">Compliance</a>
+            <a href="/news">News</a>
+        </div>
+        <div class="auth-buttons">
+            {% if user %}
+            <a href="/logout">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Reimagining Tax Filing</h1>
+        <p>Making compliance seamless and efficient.</p>
+    </div>
+
+    <!-- Chatbot Button -->
+    <button class="chatbot-button" onclick="toggleChatbot()">💬</button>
+
+    <!-- Chatbot Container -->
+    <div class="chatbot-container" id="chatbot">
+        <div class="chatbot-header">ACCX Chatbot</div>
+        <div class="chatbot-messages" id="chatbot-messages"></div>
+        <div class="chatbot-input-container">
+            <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Type your message...">
+            <button class="chatbot-send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle chatbot visibility
+        function toggleChatbot() {
+            const chatbot = document.getElementById('chatbot');
+            chatbot.style.display = chatbot.style.display === 'none' || chatbot.style.display === '' ? 'flex' : 'none';
+        }
+
+        // Send user message to the chatbot
+        async function sendMessage() {
+            const inputField = document.getElementById('chatbot-input');
+            const messagesDiv = document.getElementById('chatbot-messages');
+            const userMessage = inputField.value.trim();
+
+            if (!userMessage) {
+                alert("Please type a message.");
+                return;
+            }
+
+            // Add user message to chat
+            messagesDiv.innerHTML += `<div class="chatbot-message chatbot-user">${userMessage}</div>`;
+            inputField.value = "";
+
+            // Fetch response from backend
+            try {
+                const response = await fetch('/ask_ajax', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: userMessage }),
+                });
+
+                const data = await response.json();
+                messagesDiv.innerHTML += `<div class="chatbot-message chatbot-bot">${data.response}</div>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+            } catch (error) {
+                console.error("Error communicating with server:", error);
+                messagesDiv.innerHTML += `<div class="chatbot-message chatbot-bot">An error occurred. Please try again later.</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

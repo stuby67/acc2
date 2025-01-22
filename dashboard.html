@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000; /* Black background */
+            color: #f1c40f; /* Golden text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full height */
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px; /* Max width of the content */
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 200px; /* Reduced width */
+            background-color: #111; /* Dark sidebar */
+            color: #f1c40f; /* Golden text */
+            height: 100%;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px; /* Adjusted font size */
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff; /* White for links */
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .sidebar a:hover {
+            color: #f1c40f; /* Golden hover effect */
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            padding: 30px;
+            background-color: #222; /* Slightly lighter black */
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center align content */
+        }
+
+        .header {
+            background-color: #f1c40f; /* Golden header */
+            color: #000; /* Black text */
+            padding: 20px;
+            font-size: 24px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px; /* Restrict max width */
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: flex;
+            justify-content: space-between; /* Horizontally align */
+            width: 100%;
+            max-width: 1000px; /* Max width for the grid */
+            gap: 20px;
+            flex-wrap: wrap; /* Allow wrapping if space is tight */
+        }
+
+        .dashboard-card {
+            background: #111; /* Dark background */
+            border: 1px solid #f1c40f; /* Golden border */
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(255, 215, 0, 0.2); /* Golden shadow */
+            flex: 1;
+            min-width: 250px; /* Ensure minimum width */
+            text-align: center;
+        }
+
+        .dashboard-card h3 {
+            font-size: 14px; /* Smaller font size */
+            color: #f1c40f; /* Golden for headings */
+            margin-bottom: 5px;
+        }
+
+        .dashboard-card p {
+            color: #fff; /* White text */
+            font-size: 12px; /* Smaller font size */
+            margin: 0;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background-color: #111;
+            border: 1px solid #f1c40f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(255, 215, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Menu</h2>
+            <a href="#">Dashboard</a>
+            <a href="#">Profile</a>
+            <a href="#">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <div class="header">
+                Welcome, {{ user }}!
+            </div>
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>Total Receivables</h3>
+                    <p>₹1,25,800</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Total Payables</h3>
+                    <p>₹1,40,260</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Cash Flow</h3>
+                    <p>Cash as on 01/01/21: ₹10,000</p>
+                    <p>Income: ₹18,269</p>
+                    <p>Outgoing: ₹8,650</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart.js configuration
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        const historyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May'], // Example time series
+                datasets: [
+                    {
+                        label: 'Payables (₹)',
+                        data: [140260, 135000, 145000, 150000, 160000],
+                        borderColor: '#f1c40f',
+                        backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Cash Flow (₹)',
+                        data: [10000, 18000, 24000, 32000, 40000],
+                        borderColor: '#1abc9c',
+                        backgroundColor: 'rgba(26, 188, 156, 0.2)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff' // White text for legend
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#f1c40f' // Golden text for x-axis
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#f1c40f' // Golden text for y-axis
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

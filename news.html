@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCX - News</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #1c1c1c;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .menu {
+            display: flex;
+            gap: 15px;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .menu a:hover {
+            color: #1abc9c;
+        }
+
+        .news-container {
+            padding: 20px;
+        }
+
+        .news-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 10px;
+            background-color: #1c1c1c;
+        }
+
+        .news-item h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #f1c40f;
+        }
+
+        .news-item p {
+            font-size: 16px;
+            color: #bbb;
+        }
+
+        .news-item a {
+            color: #1abc9c;
+            text-decoration: none;
+        }
+
+        .news-item a:hover {
+            color: #16a085;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <img src="placeholder-logo.png" alt="ACCX Logo">
+        <div class="menu">
+            <a href="/">Home</a>
+            <a href="#">Ledger</a>
+            <a href="#">Transactions</a>
+            <a href="#">ITC Tracker</a>
+            <a href="#">Reconciliation</a>
+            <a href="#">Compliance</a>
+            <a href="/news">News</a>
+        </div>
+        <div class="auth-buttons">
+            {% if user %}
+            <a href="/logout">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- News Section -->
+    <div class="news-container">
+        <h1>Latest News</h1>
+        {% for article in news %}
+        <div class="news-item">
+            <h2>{{ article.title }}</h2>
+            <p>{{ article.snippet }}</p>
+            <a href="{{ article.link }}" target="_blank">Read more</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
