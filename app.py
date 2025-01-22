@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import google.generativeai as genai
 import logging
 import sqlite3
+import json
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,27 +17,22 @@ logging.basicConfig(level=logging.DEBUG)
 # Dummy in-memory database for user credentials (replace with a database for production)
 USERS = {"admin": "password123", "gstexpert": "gst@expert"}
 
-def init_db():
-    # Initialize the database with tables for ledgers
-    conn = sqlite3.connect('ledgers.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ledgers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            transaction_type TEXT NOT NULL,
-            party_name TEXT NOT NULL,
-            gst TEXT,
-            invoice_no TEXT,
-            invoice_date TEXT,
-            description TEXT,
-            quantity INTEGER,
-            total_value REAL,
-            gst_rate REAL,
-            payment_detail TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+TRANSACTIONS_FILE = 'transactions.json'
+
+def read_transactions():
+    try:
+        with open(TRANSACTIONS_FILE, 'r') as file:
+            transactions = json.load(file)
+        return transactions
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []  # Return empty list if the file doesn't exist or is empty
+
+def write_transactions(transactions):
+    try:
+        with open(TRANSACTIONS_FILE, 'w') as file:
+            json.dump(transactions, file, indent=4)
+    except Exception as e:
+        app.logger.error(f"Error writing to JSON file: {e}")
 
 def get_gemini_response(question):
     try:
@@ -150,51 +146,48 @@ def dashboard():
 def news():
     news_data = fetch_latest_news()
     return render_template('news.html', news=news_data)
-
-@app.route('/transactions', methods=['GET', 'POST'])
+@app.route('/transactions', methods=['GET','POST'])
 def transactions():
     if request.method == 'POST':
-        transaction_type = request.form['transaction_type']
-        party_name = request.form['party_name']
-        gst = request.form.get('gst', None)
-        invoice_no = request.form.get('invoice_no', None)
-        invoice_date = request.form.get('invoice_date', None)
-        description = request.form.get('description', None)
-        quantity = request.form.get('quantity', None)
-        total_value = request.form.get('total_value', None)
-        gst_rate = request.form.get('gst_rate', None)
-        payment_detail = request.form.get('payment_detail', None)
+        try:
+            # Extract form data
+            transaction_type = request.form.get('transaction_type')
+            party_name = request.form.get('party_name')
+            description = request.form.get('description')
+            quantity = request.form.get('quantity')
+            total_value = request.form.get('total_value')
+            payment_detail = request.form.get('payment_detail')
 
-        conn = sqlite3.connect('ledgers.db')
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO ledgers (
-                transaction_type, party_name, gst, invoice_no, invoice_date, 
-                description, quantity, total_value, gst_rate, payment_detail
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (transaction_type, party_name, gst, invoice_no, invoice_date, description, quantity, total_value, gst_rate, payment_detail))
-        conn.commit()
-        conn.close()
+            # Log the received data
+            app.logger.info(f"Form data received: {transaction_type}, {party_name}, {description}, {quantity}, {total_value}, {payment_detail}")
 
-        return redirect(url_for('transactions'))
+            # Store the transaction in a JSON file (or database as needed)
+            transactions = read_transactions()
+            transactions.append({
+                "transaction_type": transaction_type,
+                "party_name": party_name,
+                "description": description,
+                "quantity": quantity,
+                "total_value": total_value,
+                "payment_detail": payment_detail
+            })
+            write_transactions(transactions)
+            flash("Transaction added successfully!", "success")
+            
+        except Exception as e:
+                app.logger.error(f"Error inserting transaction: {e}")
+                flash("Error adding transaction. Please try again.", "danger")
+
+        return redirect(url_for('ledgers'))
 
     return render_template('transactions.html')
-
 @app.route('/ledgers')
 def ledgers():
-    try:
-        conn = sqlite3.connect('ledgers.db')
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM ledgers')
-        data = cursor.fetchall()
-        conn.close()
-        app.logger.info("Ledgers fetched successfully.")
-    except Exception as e:
-        app.logger.error(f"Error fetching ledgers: {e}")
-        data = []
+    # Read transactions from the JSON file
+    transactions = read_transactions()
 
-    return render_template('ledgers.html', data=data)
+    return render_template('ledgers.html', data=transactions)
 
 if __name__ == '__main__':
-    init_db()
+    
     app.run(debug=True)

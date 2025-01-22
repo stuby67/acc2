@@ -63,6 +63,55 @@
             const type = document.getElementById('transaction_type').value;
             document.getElementById('seller_form').style.display = type === 'Seller' ? 'block' : 'none';
             document.getElementById('buyer_form').style.display = type === 'Buyer' ? 'block' : 'none';
+
+            // Enable fields for the selected form and disable others
+            toggleFieldset('seller_form', type === 'Seller');
+            toggleFieldset('buyer_form', type === 'Buyer');
+        }
+
+        function toggleFieldset(formId, enable) {
+            const formFields = document.querySelectorAll(`#${formId} input, #${formId} select`);
+            formFields.forEach(field => {
+                field.disabled = !enable; // Disable or enable the field
+            });
+        }
+
+        function submitForm(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Validate required fields
+            const transactionType = document.getElementById('transaction_type').value;
+            if (!transactionType) {
+                alert("Please select a transaction type.");
+                return;
+            }
+
+            // Get the form data
+            const formData = new FormData(document.getElementById('transaction_form'));
+
+            // Send data to the server via fetch
+            fetch('/transactions', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url; // Redirect to the target page
+                } else {
+                    return response.json(); // Handle any error messages
+                }
+            })
+            .then(data => {
+                if (data?.error) {
+                    alert(data.error);
+                } else {
+                    alert("Form submitted successfully!");
+                }
+            })
+            .catch(error => {
+                console.error("Error submitting the form:", error);
+                alert("An error occurred while submitting the form.");
+            });
         }
     </script>
 </head>
@@ -72,7 +121,7 @@
         <a href="/transactions">Transactions</a>
         <a href="/ledgers">Ledgers</a>
     </nav>
-    <form method="POST">
+    <form id="transaction_form">
         <label for="transaction_type">Transaction Type:</label>
         <select id="transaction_type" name="transaction_type" onchange="toggleForm()" required>
             <option value="">Select Type</option>
@@ -82,31 +131,31 @@
 
         <div id="seller_form" style="display: none;">
             <label for="party_name">Seller Name:</label>
-            <input type="text" id="party_name" name="party_name" required>
+            <input type="text" id="seller_party_name" name="party_name">
 
             <label for="gst">Seller GST:</label>
-            <input type="text" id="gst" name="gst" required>
+            <input type="text" id="gst" name="gst">
 
             <label for="invoice_no">Invoice No:</label>
-            <input type="text" id="invoice_no" name="invoice_no" required>
+            <input type="text" id="invoice_no" name="invoice_no">
 
             <label for="invoice_date">Invoice Date:</label>
-            <input type="date" id="invoice_date" name="invoice_date" required>
+            <input type="date" id="invoice_date" name="invoice_date">
 
             <label for="description">Description of Goods and Services:</label>
-            <input type="text" id="description" name="description" required>
+            <input type="text" id="seller_description" name="description">
 
             <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" required>
+            <input type="number" id="seller_quantity" name="quantity">
 
             <label for="total_value">Total Value:</label>
-            <input type="number" id="total_value" name="total_value" step="0.01" required>
+            <input type="number" id="seller_total_value" name="total_value" step="0.01">
 
             <label for="gst_rate">Applicable GST Rate (%):</label>
-            <input type="number" id="gst_rate" name="gst_rate" step="0.01" required>
+            <input type="number" id="gst_rate" name="gst_rate" step="0.01">
 
             <label for="payment_detail">Payment Details:</label>
-            <select id="payment_detail" name="payment_detail" required>
+            <select id="seller_payment_detail" name="payment_detail">
                 <option value="Card">Card</option>
                 <option value="Cash">Cash</option>
             </select>
@@ -114,25 +163,25 @@
 
         <div id="buyer_form" style="display: none;">
             <label for="party_name">Buyer Name:</label>
-            <input type="text" id="party_name" name="party_name" required>
+            <input type="text" id="buyer_party_name" name="party_name">
 
             <label for="description">Description of Goods and Services:</label>
-            <input type="text" id="description" name="description" required>
+            <input type="text" id="buyer_description" name="description">
 
             <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" required>
+            <input type="number" id="buyer_quantity" name="quantity">
 
             <label for="total_value">Total Value:</label>
-            <input type="number" id="total_value" name="total_value" step="0.01" required>
+            <input type="number" id="buyer_total_value" name="total_value" step="0.01">
 
             <label for="payment_detail">Payment Details:</label>
-            <select id="payment_detail" name="payment_detail" required>
+            <select id="buyer_payment_detail" name="payment_detail">
                 <option value="Card">Card</option>
                 <option value="Cash">Cash</option>
             </select>
         </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit" onclick="submitForm(event)">Submit</button>
     </form>
 </body>
 </html>

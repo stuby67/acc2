@@ -50,33 +50,23 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Transaction Type</th>
                 <th>Party Name</th>
-                <th>GST</th>
-                <th>Invoice No</th>
-                <th>Invoice Date</th>
                 <th>Description</th>
                 <th>Quantity</th>
                 <th>Total Value</th>
-                <th>GST Rate</th>
                 <th>Payment Detail</th>
             </tr>
         </thead>
         <tbody>
             {% for row in data %}
             <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
-                <td>{{ row[5] }}</td>
-                <td>{{ row[6] }}</td>
-                <td>{{ row[7] }}</td>
-                <td>{{ row[8] }}</td>
-                <td>{{ row[9] }}</td>
-                <td>{{ row[10] }}</td>
+                <td>{{ row['transaction_type'] }}</td>
+                <td>{{ row['party_name'] }}</td>
+                <td>{{ row['description'] }}</td>
+                <td>{{ row['quantity'] }}</td>
+                <td>{{ row['total_value'] }}</td>
+                <td>{{ row['payment_detail'] }}</td>
             </tr>
             {% endfor %}
         </tbody>
