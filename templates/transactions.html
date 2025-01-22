@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        nav {
+            background-color: goldenrod;
+            padding: 15px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        form {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: goldenrod;
+            border-radius: 10px;
+        }
+        form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        form input, form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+        }
+        form button {
+            background-color: black;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: white;
+            color: black;
+        }
+    </style>
+    <script>
+        function toggleForm() {
+            const type = document.getElementById('transaction_type').value;
+            document.getElementById('seller_form').style.display = type === 'Seller' ? 'block' : 'none';
+            document.getElementById('buyer_form').style.display = type === 'Buyer' ? 'block' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <nav>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/transactions">Transactions</a>
+        <a href="/ledgers">Ledgers</a>
+    </nav>
+    <form method="POST">
+        <label for="transaction_type">Transaction Type:</label>
+        <select id="transaction_type" name="transaction_type" onchange="toggleForm()" required>
+            <option value="">Select Type</option>
+            <option value="Buyer">Buyer</option>
+            <option value="Seller">Seller</option>
+        </select>
+
+        <div id="seller_form" style="display: none;">
+            <label for="party_name">Seller Name:</label>
+            <input type="text" id="party_name" name="party_name" required>
+
+            <label for="gst">Seller GST:</label>
+            <input type="text" id="gst" name="gst" required>
+
+            <label for="invoice_no">Invoice No:</label>
+            <input type="text" id="invoice_no" name="invoice_no" required>
+
+            <label for="invoice_date">Invoice Date:</label>
+            <input type="date" id="invoice_date" name="invoice_date" required>
+
+            <label for="description">Description of Goods and Services:</label>
+            <input type="text" id="description" name="description" required>
+
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+
+            <label for="total_value">Total Value:</label>
+            <input type="number" id="total_value" name="total_value" step="0.01" required>
+
+            <label for="gst_rate">Applicable GST Rate (%):</label>
+            <input type="number" id="gst_rate" name="gst_rate" step="0.01" required>
+
+            <label for="payment_detail">Payment Details:</label>
+            <select id="payment_detail" name="payment_detail" required>
+                <option value="Card">Card</option>
+                <option value="Cash">Cash</option>
+            </select>
+        </div>
+
+        <div id="buyer_form" style="display: none;">
+            <label for="party_name">Buyer Name:</label>
+            <input type="text" id="party_name" name="party_name" required>
+
+            <label for="description">Description of Goods and Services:</label>
+            <input type="text" id="description" name="description" required>
+
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+
+            <label for="total_value">Total Value:</label>
+            <input type="number" id="total_value" name="total_value" step="0.01" required>
+
+            <label for="payment_detail">Payment Details:</label>
+            <select id="payment_detail" name="payment_detail" required>
+                <option value="Card">Card</option>
+                <option value="Cash">Cash</option>
+            </select>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

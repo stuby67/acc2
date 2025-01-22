@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 import google.generativeai as genai
 import logging
-import requests
-from bs4 import BeautifulSoup
+import sqlite3
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,6 +15,28 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Dummy in-memory database for user credentials (replace with a database for production)
 USERS = {"admin": "password123", "gstexpert": "gst@expert"}
+
+def init_db():
+    # Initialize the database with tables for ledgers
+    conn = sqlite3.connect('ledgers.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS ledgers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_type TEXT NOT NULL,
+            party_name TEXT NOT NULL,
+            gst TEXT,
+            invoice_no TEXT,
+            invoice_date TEXT,
+            description TEXT,
+            quantity INTEGER,
+            total_value REAL,
+            gst_rate REAL,
+            payment_detail TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
 def get_gemini_response(question):
     try:
@@ -37,6 +58,7 @@ def get_gemini_response(question):
     except Exception as e:
         logging.error(f"Error generating response from Generative AI: {e}")
         return "An error occurred while processing your request. Please try again later."
+
 def fetch_latest_news():
     try:
         # Hardcoded latest news
@@ -71,7 +93,6 @@ def fetch_latest_news():
     except Exception as e:
         logging.error(f"Error fetching news: {e}")
         return [{"title": "Unable to fetch news. Please try again later.", "link": "#", "snippet": ""}]
-
 
 @app.route('/')
 def index():
@@ -122,14 +143,58 @@ def signup():
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
-        return redirect('/login')
+        return redirect(url_for('login'))
     return render_template('dashboard.html', user=session.get('user'))
-
 
 @app.route('/news')
 def news():
     news_data = fetch_latest_news()
     return render_template('news.html', news=news_data)
 
+@app.route('/transactions', methods=['GET', 'POST'])
+def transactions():
+    if request.method == 'POST':
+        transaction_type = request.form['transaction_type']
+        party_name = request.form['party_name']
+        gst = request.form.get('gst', None)
+        invoice_no = request.form.get('invoice_no', None)
+        invoice_date = request.form.get('invoice_date', None)
+        description = request.form.get('description', None)
+        quantity = request.form.get('quantity', None)
+        total_value = request.form.get('total_value', None)
+        gst_rate = request.form.get('gst_rate', None)
+        payment_detail = request.form.get('payment_detail', None)
+
+        conn = sqlite3.connect('ledgers.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO ledgers (
+                transaction_type, party_name, gst, invoice_no, invoice_date, 
+                description, quantity, total_value, gst_rate, payment_detail
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (transaction_type, party_name, gst, invoice_no, invoice_date, description, quantity, total_value, gst_rate, payment_detail))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('transactions'))
+
+    return render_template('transactions.html')
+
+@app.route('/ledgers')
+def ledgers():
+    try:
+        conn = sqlite3.connect('ledgers.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM ledgers')
+        data = cursor.fetchall()
+        conn.close()
+        app.logger.info("Ledgers fetched successfully.")
+    except Exception as e:
+        app.logger.error(f"Error fetching ledgers: {e}")
+        data = []
+
+    return render_template('ledgers.html', data=data)
+
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
